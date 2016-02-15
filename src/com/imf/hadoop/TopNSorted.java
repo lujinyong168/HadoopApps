@@ -23,12 +23,13 @@ public class TopNSorted {
 		@Override
 		protected void setup(Mapper<LongWritable, Text, IntWritable, IntWritable>.Context context)
 				throws IOException, InterruptedException {
+			System.out.println("Mapper setup...");
 			len = context.getConfiguration().getInt("topn", 5);
 			topN = new int[len + 1];
 		}
 
 		public void map(LongWritable key, Text value, Context context) throws IOException, InterruptedException {
-			System.out.println("Mapper...");
+			System.out.println("Mapper map...");
 			String[] data = value.toString().split(",");
 			if (4 == data.length) {
 				int cost = Integer.valueOf(data[2]);
@@ -40,6 +41,7 @@ public class TopNSorted {
 		@Override
 		protected void cleanup(Mapper<LongWritable, Text, IntWritable, IntWritable>.Context context)
 				throws IOException, InterruptedException {
+			System.out.println("Mapper cleanup...");
 			for (int i = 1; i < len; i++) {
 				context.write(new IntWritable(topN[i]), new IntWritable(topN[i]));
 			}
@@ -52,18 +54,20 @@ public class TopNSorted {
 		@Override
 		protected void setup(Reducer<IntWritable, IntWritable, Text, IntWritable>.Context context)
 				throws IOException, InterruptedException {
+			System.out.println("Reducer setup...");
 			len = context.getConfiguration().getInt("topn", 5);
 			topN = new int[len + 1];
 		}
 		public void reduce(IntWritable key, Iterable<IntWritable> values, Context context)
 				throws IOException, InterruptedException {
-			System.out.println("Reducer...");
+			System.out.println("Reducer reduce...");
 			topN[0] = key.get();
 			Arrays.sort(topN);
 		}
 		@Override
 		protected void cleanup(Reducer<IntWritable, IntWritable, Text, IntWritable>.Context context)
 				throws IOException, InterruptedException {
+			System.out.println("Reducer cleanup...");
 			for (int i = len; i >0; i--) {
 				context.write(new Text(String.valueOf(len-i +1)), new IntWritable(topN[i]));
 			}
@@ -78,13 +82,13 @@ public class TopNSorted {
 			System.err.println("Usage: wordcount <in> [<in>...] <out>");
 			System.exit(2);
 		}
-		Job job = Job.getInstance(conf, "MaxMinValue");
+		Job job = Job.getInstance(conf, "TopNSorted");
 		job.setJarByClass(WordCount.class);
 		job.setMapperClass(DataMapper.class);
 		// job.setCombinerClass(Averageducer.class);
 		job.setReducerClass(DataReducer.class);
-		job.setOutputKeyClass(Text.class);
-		job.setOutputValueClass(Text.class);
+		job.setOutputKeyClass(IntWritable.class);
+		job.setOutputValueClass(IntWritable.class);
 		for (int i = 0; i < otherArgs.length - 1; ++i) {
 			FileInputFormat.addInputPath(job, new Path(otherArgs[i]));
 		}
