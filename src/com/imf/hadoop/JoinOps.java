@@ -49,9 +49,8 @@ public class JoinOps {
 	public static class DataReducer extends Reducer<LongWritable, WorkerInfo, LongWritable,Text> {
 		public void reduce(Text key, Iterable<WorkerInfo> values, Context context)
 				throws IOException, InterruptedException {
-			LongWritable outKey = new LongWritable(0);
-			Text outVal = new Text();
 			System.out.println("Reducer reduce...");
+			LongWritable outKey = new LongWritable(0);
 			WorkerInfo dept = null;
 			List<WorkerInfo> list = new ArrayList<WorkerInfo>();
 			for (WorkerInfo item : values) {
@@ -64,8 +63,7 @@ public class JoinOps {
 			for (WorkerInfo worker : list) {
 				worker.setDeptNo(dept.getDeptNo());
 				worker.setDeptName(dept.getDeptName());
-				outVal.set(worker.toString());
-				context.write(outKey,outVal);
+				context.write(outKey, new Text(worker.toString()));
 			}
 		}
 	}
@@ -100,10 +98,10 @@ public class JoinOps {
  * @Date: 2016年2月16日 上午6:37:27
  */
 class WorkerInfo implements WritableComparable<Object>{
-	private String workerNo;
-	private String workerName;
-	private String deptNo;
-	private String deptName;
+	private String workerNo="";
+	private String workerName="";
+	private String deptNo="";
+	private String deptName="";
 	private int flag = 0;//0 is department,1 is worker;default 0;
 
 	public WorkerInfo(String workerNo, String workerName, String deptNo, String deptName, int flag) {
@@ -115,11 +113,11 @@ class WorkerInfo implements WritableComparable<Object>{
 		this.flag = flag;
 	}
 	public WorkerInfo(WorkerInfo worker){
-		this.workerNo = worker.getWorkerNo();
-		this.workerName = worker.getWorkerName();
-		this.deptNo = worker.getDeptNo();
-		this.deptName = worker.getDeptName();
-		this.flag = worker.getFlag();
+		this.workerNo = worker.workerNo;
+		this.workerName = worker.workerName;
+		this.deptNo = worker.deptNo;
+		this.deptName = worker.deptName;
+		this.flag = worker.flag;
 	}
 	public WorkerInfo() {	}
 
